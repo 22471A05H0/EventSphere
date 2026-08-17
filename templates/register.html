@@ -1,0 +1,1 @@
+{% extends 'base.html' %}{% block content %}<div class="card p-4"><h3>Participant Registration – {{event.name}}</h3><p>{{event.date}} | {{event.venue|default:'Venue not selected'}}</p><form method="post">{% csrf_token %}{{form.as_p}}<button class="btn btn-success">Register & Generate Ticket</button></form></div>{% endblock %}
