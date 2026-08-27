@@ -1,5 +1,5 @@
 from django import forms
-from .models import Event,Venue,Resource,Attendee,Vendor,VendorAssignment,Notification
+from .models import Event,Venue,Resource,Attendee,Vendor,VendorAssignment,Notification,Budget, Expense, Revenue
 
 class EventForm(forms.ModelForm):
     class Meta:
@@ -36,3 +36,90 @@ class RatingForm(forms.ModelForm):
         widgets={x:forms.NumberInput(attrs={'min':1,'max':5}) for x in ['quality','timeliness','cost_rating','communication']}
 class NotificationForm(forms.ModelForm):
     class Meta: model=Notification; fields=['recipient_type','recipient','message']
+
+class BudgetForm(forms.ModelForm):
+
+    class Meta:
+        model = Budget
+        fields = ["amount"]
+
+        widgets = {
+            "amount": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Enter budget"
+                }
+            )
+        }
+
+
+class ExpenseForm(forms.ModelForm):
+
+    class Meta:
+        model = Expense
+
+        fields = [
+            "category",
+            "description",
+            "amount",
+            "status",
+            "payment_method",
+            "invoice_number",
+        ]
+
+        widgets = {
+            "category": forms.Select(
+                attrs={"class": "form-control"}
+            ),
+
+            "description": forms.TextInput(
+                attrs={"class": "form-control"}
+            ),
+
+            "amount": forms.NumberInput(
+                attrs={"class": "form-control"}
+            ),
+
+            "status": forms.Select(
+                attrs={"class": "form-control"}
+            ),
+
+            "payment_method": forms.TextInput(
+                attrs={"class": "form-control"}
+            ),
+
+            "invoice_number": forms.TextInput(
+                attrs={"class": "form-control"}
+            ),
+        }
+
+
+class RevenueForm(forms.ModelForm):
+
+    class Meta:
+        model = Revenue
+
+        fields = [
+            "source",
+            "description",
+            "amount",
+            "payment_method",
+        ]
+
+        widgets = {
+            "source": forms.Select(
+                attrs={"class": "form-control"}
+            ),
+
+            "description": forms.TextInput(
+                attrs={"class": "form-control"}
+            ),
+
+            "amount": forms.NumberInput(
+                attrs={"class": "form-control"}
+            ),
+
+            "payment_method": forms.TextInput(
+                attrs={"class": "form-control"}
+            ),
+        }

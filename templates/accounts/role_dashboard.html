@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2>
+                Welcome, {{ request.user.username }}
+            </h2>
+
+            <p class="text-muted mb-0">
+                Role: {{ profile.get_role_display }}
+            </p>
+
+        </div>
+
+        <a
+            href="{% url 'accounts:profile' %}"
+            class="btn btn-outline-primary"
+        >
+            My Profile
+        </a>
+
+    </div>
+
+
+    <div class="row g-3">
+
+        {% if profile.role == "ADMIN" %}
+
+        <div class="col-md-4">
+
+            <div class="card h-100 shadow-sm">
+
+                <div class="card-body">
+
+                    <h5>System Administration</h5>
+
+                    <p>
+                        Manage users, events and reports.
+                    </p>
+
+                    <a
+                        href="/admin/"
+                        class="btn btn-primary"
+                    >
+                        Open Admin
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+
+        {% if profile.role == "ORGANIZER" %}
+
+        <div class="col-md-4">
+
+            <div class="card h-100 shadow-sm">
+
+                <div class="card-body">
+
+                    <h5>Event Management</h5>
+
+                    <p>
+                        Manage events, venues and resources.
+                    </p>
+
+                    <a
+                        href="/"
+                        class="btn btn-primary"
+                    >
+                        Open Dashboard
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+
+        {% if profile.role == "STAFF" %}
+
+        <div class="col-md-4">
+
+            <div class="card h-100 shadow-sm">
+
+                <div class="card-body">
+
+                    <h5>Event Operations</h5>
+
+                    <p>
+                        View assigned event activities.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+
+        {% if profile.role == "VENDOR" %}
+
+        <div class="col-md-4">
+
+            <div class="card h-100 shadow-sm">
+
+                <div class="card-body">
+
+                    <h5>Vendor Services</h5>
+
+                    <p>
+                        View assigned event services.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+
+        {% if profile.role == "ATTENDEE" %}
+
+        <div class="col-md-4">
+
+            <div class="card h-100 shadow-sm">
+
+                <div class="card-body">
+
+                    <h5>My Events</h5>
+
+                    <p>
+                        View registered events and tickets.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

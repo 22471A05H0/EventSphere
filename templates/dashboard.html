@@ -1,1 +1,274 @@
-{% extends 'base.html' %}{% block content %}<h2>Organizer Dashboard</h2><p class="text-muted">Integrated Milestone 1 + Milestone 2</p><div class="row g-3"><div class="col"><div class="card p-3"><b>Events</b><h2>{{event_count}}</h2></div></div><div class="col"><div class="card p-3"><b>Registrations</b><h2>{{attendee_count}}</h2></div></div><div class="col"><div class="card p-3"><b>Checked In</b><h2>{{checked_in}}</h2></div></div><div class="col"><div class="card p-3"><b>Vendors</b><h2>{{vendor_count}}</h2></div></div></div><div class="card p-3 mt-4"><table class="table"><tr><th>Event</th><th>Date</th><th>Venue</th><th>Status</th><th>Action</th></tr>{% for e in events %}<tr><td>{{e.name}}</td><td>{{e.date}}</td><td>{{e.venue|default:'Not selected'}}</td><td>{{e.status}}</td><td><a class="btn btn-sm btn-primary" href="/events/{{e.id}}/">Open</a> <a class="btn btn-sm btn-success" href="/events/{{e.id}}/register/">Register</a></td></tr>{% empty %}<tr><td colspan="5">No events yet.</td></tr>{% endfor %}</table></div>{% endblock %}
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+
+<div class="container">
+
+
+    <!-- ================= HEADER ================= -->
+
+    <div class="mb-4">
+
+        <h2 class="fw-bold">
+            Organizer Dashboard
+        </h2>
+
+
+    </div>
+
+
+    <!-- ================= STATISTICS ================= -->
+
+    <div class="row g-3">
+
+
+        <!-- Events -->
+
+        <div class="col-md-3">
+
+            <div class="card shadow-sm p-3">
+
+                <b>
+                    Events
+                </b>
+
+                <h2>
+                    {{ event_count }}
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <!-- Registrations -->
+
+        <div class="col-md-3">
+
+            <div class="card shadow-sm p-3">
+
+                <b>
+                    Registrations
+                </b>
+
+                <h2>
+                    {{ attendee_count }}
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <!-- Checked In -->
+
+        <div class="col-md-3">
+
+            <div class="card shadow-sm p-3">
+
+                <b>
+                    Checked In
+                </b>
+
+                <h2>
+                    {{ checked_in }}
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <!-- Vendors -->
+
+        <div class="col-md-3">
+
+            <div class="card shadow-sm p-3">
+
+                <b>
+                    Vendors
+                </b>
+
+                <h2>
+                    {{ vendor_count }}
+                </h2>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- ================= EVENT TABLE ================= -->
+
+    <div class="card shadow-sm p-3 mt-4">
+
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+
+            <h4>
+                Events
+            </h4>
+
+
+            <a
+                class="btn btn-primary"
+                href="/events/create/"
+            >
+                + Create Event
+            </a>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table class="table table-hover">
+
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Event
+                        </th>
+
+                        <th>
+                            Date
+                        </th>
+
+                        <th>
+                            Venue
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                        <th>
+                            Actions
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+
+                    {% for e in events %}
+
+
+                        <tr>
+
+
+                            <td>
+
+                                <strong>
+                                    {{ e.name }}
+                                </strong>
+
+                            </td>
+
+
+                            <td>
+
+                                {{ e.date }}
+
+                            </td>
+
+
+                            <td>
+
+                                {{ e.venue|default:'Not selected' }}
+
+                            </td>
+
+
+                            <td>
+
+                                {{ e.status }}
+
+                            </td>
+
+
+                            <td>
+
+
+                                <a
+                                    class="btn btn-sm btn-primary"
+                                    href="/events/{{ e.id }}/"
+                                >
+                                    Open
+                                </a>
+
+
+                                <a
+                                    class="btn btn-sm btn-success"
+                                    href="/events/{{ e.id }}/register/"
+                                >
+                                    Register
+                                </a>
+
+
+                                <!-- Milestone 3 Finance -->
+
+                                <a
+                                    class="btn btn-sm btn-warning"
+                                    href="{% url 'finance_dashboard' e.id %}"
+                                >
+                                    Finance
+                                </a>
+
+
+                            </td>
+
+
+                        </tr>
+
+
+                    {% empty %}
+
+
+                        <tr>
+
+                            <td
+                                colspan="5"
+                                class="text-center text-muted"
+                            >
+
+                                No events yet.
+
+                                <a href="/events/create/">
+                                    Create your first event.
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+
+                    {% endfor %}
+
+
+                </tbody>
+
+
+            </table>
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+{% endblock %}

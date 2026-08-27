@@ -4,8 +4,9 @@ from django.contrib import messages
 from django.core.files.base import ContentFile
 from django.db.models import Count,Sum
 from django.shortcuts import get_object_or_404,redirect,render
-from .models import Event,Venue,Resource,ResourceAllocation,Attendee,Ticket,Vendor,VendorAssignment,Notification
-from .forms import EventForm,VenueForm,ResourceForm,AttendeeForm,VendorForm,AllocationForm,AssignmentForm,RatingForm,NotificationForm
+from .models import Event,Venue,Resource,ResourceAllocation,Attendee,Ticket,Vendor,VendorAssignment,Notification,Budget, Expense, Revenue
+from .forms import EventForm,VenueForm,ResourceForm,AttendeeForm,VendorForm,AllocationForm,AssignmentForm,RatingForm,NotificationForm,BudgetForm, ExpenseForm, RevenueForm
+
 
 def dashboard(request):
     events=Event.objects.select_related('venue').order_by('-id')
@@ -101,3 +102,162 @@ def notifications(request):
 def reports(request):
     events=Event.objects.select_related('venue').annotate(participants=Count('attendees'),allocated_units=Sum('resource_allocations__quantity'))
     return render(request,'reports.html',{'events':events,'total_events':Event.objects.count(),'total_attendees':Attendee.objects.count(),'checked_in':Attendee.objects.filter(attendance_status='Checked In').count(),'total_vendors':Vendor.objects.count(),'total_venues':Venue.objects.count()})
+
+def finance_dashboard(request, event_id):
+
+    event = get_object_or_404(Event, id=event_id)
+
+    budget, created = Budget.objects.get_or_create(
+        event=event,
+        defaults={"amount": 0}
+    )
+
+    expenses = Expense.objects.filter(event=event)
+
+    revenues = Revenue.objects.filter(event=event)
+
+    total_expenses = sum(
+        expense.amount
+        for expense in expenses
+        if expense.status == "PAID"
+    )
+
+    total_revenue = sum(
+        revenue.amount
+        for revenue in revenues
+    )
+
+    remaining = budget.amount - total_expenses
+
+    profit = total_revenue - total_expenses
+
+    return render(
+        request,
+        "finance/dashboard.html",
+        {
+            "event": event,
+            "budget": budget,
+            "expenses": expenses,
+            "revenues": revenues,
+            "total_expenses": total_expenses,
+            "total_revenue": total_revenue,
+            "remaining": remaining,
+            "profit": profit,
+        }
+    )
+
+
+def set_budget(request, event_id):
+
+    event = get_object_or_404(Event, id=event_id)
+
+    budget, created = Budget.objects.get_or_create(
+        event=event
+    )
+
+    if request.method == "POST":
+
+        form = BudgetForm(
+            request.POST,
+            instance=budget
+        )
+
+        if form.is_valid():
+            form.save()
+            return redirect(
+                "finance_dashboard",
+                event_id=event.id
+            )
+
+    else:
+
+        form = BudgetForm(
+            instance=budget
+        )
+
+    return render(
+        request,
+        "finance/budget.html",
+        {
+            "event": event,
+            "form": form,
+        }
+    )
+
+
+def add_expense(request, event_id):
+
+    event = get_object_or_404(
+        Event,
+        id=event_id
+    )
+
+    if request.method == "POST":
+
+        form = ExpenseForm(request.POST)
+
+        if form.is_valid():
+
+            expense = form.save(
+                commit=False
+            )
+
+            expense.event = event
+            expense.save()
+
+            return redirect(
+                "finance_dashboard",
+                event_id=event.id
+            )
+
+    else:
+
+        form = ExpenseForm()
+
+    return render(
+        request,
+        "finance/expense_form.html",
+        {
+            "event": event,
+            "form": form,
+        }
+    )
+
+
+def add_revenue(request, event_id):
+
+    event = get_object_or_404(
+        Event,
+        id=event_id
+    )
+
+    if request.method == "POST":
+
+        form = RevenueForm(request.POST)
+
+        if form.is_valid():
+
+            revenue = form.save(
+                commit=False
+            )
+
+            revenue.event = event
+            revenue.save()
+
+            return redirect(
+                "finance_dashboard",
+                event_id=event.id
+            )
+
+    else:
+
+        form = RevenueForm()
+
+    return render(
+        request,
+        "finance/revenue_form.html",
+        {
+            "event": event,
+            "form": form,
+        }
+    )

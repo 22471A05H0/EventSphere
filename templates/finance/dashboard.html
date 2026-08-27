@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>Finance Dashboard</h2>
+
+    <h4>{{ event.name }}</h4>
+
+    <div class="row mt-4">
+
+        <div class="col-md-3">
+            <div class="card p-3">
+                <h6>Total Budget</h6>
+                <h3>₹{{ budget.amount }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card p-3">
+                <h6>Total Expenses</h6>
+                <h3>₹{{ total_expenses }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card p-3">
+                <h6>Total Revenue</h6>
+                <h3>₹{{ total_revenue }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card p-3">
+                <h6>Profit / Loss</h6>
+                <h3>₹{{ profit }}</h3>
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="mt-4">
+
+        <a href="{% url 'set_budget' event.id %}"
+           class="btn btn-primary">
+
+            Set Budget
+
+        </a>
+
+        <a href="{% url 'add_expense' event.id %}"
+           class="btn btn-danger">
+
+            Add Expense
+
+        </a>
+
+        <a href="{% url 'add_revenue' event.id %}"
+           class="btn btn-success">
+
+            Add Revenue
+
+        </a>
+
+    </div>
+
+
+    <div class="card mt-4 p-3">
+
+        <h4>Budget Summary</h4>
+
+        <p>
+            Budget:
+            <strong>₹{{ budget.amount }}</strong>
+        </p>
+
+        <p>
+            Spent:
+            <strong>₹{{ total_expenses }}</strong>
+        </p>
+
+        <p>
+            Remaining:
+            <strong>₹{{ remaining }}</strong>
+        </p>
+
+    </div>
+
+
+    <div class="card mt-4 p-3">
+
+        <h4>Recent Expenses</h4>
+
+        <table class="table">
+
+            <thead>
+
+                <tr>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for expense in expenses %}
+
+                <tr>
+
+                    <td>{{ expense.category }}</td>
+
+                    <td>{{ expense.description }}</td>
+
+                    <td>₹{{ expense.amount }}</td>
+
+                    <td>{{ expense.status }}</td>
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+                    <td colspan="4">
+                        No expenses yet.
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <div class="card mt-4 p-3">
+
+        <h4>Revenue</h4>
+
+        <table class="table">
+
+            <thead>
+
+                <tr>
+                    <th>Source</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for revenue in revenues %}
+
+                <tr>
+
+                    <td>{{ revenue.source }}</td>
+
+                    <td>{{ revenue.description }}</td>
+
+                    <td>₹{{ revenue.amount }}</td>
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+                    <td colspan="3">
+                        No revenue yet.
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

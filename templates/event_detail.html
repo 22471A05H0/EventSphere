@@ -1,1 +1,7 @@
 {% extends 'base.html' %}{% block content %}<div class="card p-4"><h2>{{event.name}}</h2><p>{{event.event_type}} | {{event.date}} | Budget ₹{{event.budget}} | Expected {{event.expected_participants}}</p><p><b>Venue:</b> {{event.venue|default:'Not selected'}} | <b>Status:</b> {{event.status}}</p><a class="btn btn-primary" href="/events/{{event.id}}/venue/">Select Venue</a> <a class="btn btn-primary" href="/events/{{event.id}}/resources/">Allocate Resources</a> <a class="btn btn-success" href="/events/{{event.id}}/register/">Register Participant</a> <a class="btn btn-warning" href="/events/{{event.id}}/vendors/">Assign Vendor</a></div>{% endblock %}
+<a href="{% url 'finance_dashboard' event.id %}"
+   class="btn btn-primary">
+
+    💰 Finance
+
+</a>

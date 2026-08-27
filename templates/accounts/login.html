@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+
+        <div class="col-md-6">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">EventSphere Login</h4>
+                </div>
+
+                <div class="card-body">
+
+                    <form method="post">
+
+                        {% csrf_token %}
+
+                        {{ form.as_p }}
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary w-100"
+                        >
+                            Login
+                        </button>
+
+                    </form>
+
+                    <hr>
+
+                    <p class="text-center mb-0">
+
+                        New user?
+
+                        <a href="{% url 'accounts:register' %}">
+                            Register here
+                        </a>
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

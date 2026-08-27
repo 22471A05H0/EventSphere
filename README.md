@@ -72,3 +72,29 @@ Technology
 - HTML/CSS
 - Bootstrap
 - QR Code
+
+## Milestone 3 – Sprint 1 Extension
+Sprint 1 adds authentication and role-based dashboards without replacing the existing Milestone 1/2 modules.
+
+### New features
+- Login and logout
+- New user registration
+- Role profile: Admin, Organizer, Staff, Vendor, Attendee
+- Role-based dashboard
+- User profile editing
+- Django admin user/profile management
+
+### Sprint 1 URLs
+- `/accounts/login/`
+- `/accounts/register/`
+- `/accounts/dashboard/`
+- `/accounts/profile/`
+- `/accounts/logout/`
+
+Run the existing migration first, then the new migration:
+```powershell
+python manage.py migrate
+python manage.py runserver
+```
+
+For the Admin role, create a superuser and open `/admin/`. The Sprint 1 profile automatically treats a Django superuser as Admin when they access the new dashboard.

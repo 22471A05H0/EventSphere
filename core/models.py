@@ -74,3 +74,136 @@ class Notification(models.Model):
     message=models.TextField()
     created_at=models.DateTimeField(auto_now_add=True)
     sent=models.BooleanField(default=False)
+
+class Budget(models.Model):
+    event = models.OneToOneField(
+        Event,
+        on_delete=models.CASCADE,
+        related_name="budget_record"
+    )
+    amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+
+    def __str__(self):
+        return f"{self.event.name} - ₹{self.amount}"
+
+    def spent(self):
+        return sum(
+            expense.amount
+            for expense in self.event.expenses.filter(
+                status="PAID"
+            )
+        )
+
+    def remaining(self):
+        return self.amount - self.spent()
+
+
+class Expense(models.Model):
+
+    CATEGORY_CHOICES = [
+        ("Venue", "Venue"),
+        ("Catering", "Catering"),
+        ("Equipment", "Equipment"),
+        ("Transportation", "Transportation"),
+        ("Decoration", "Decoration"),
+        ("Marketing", "Marketing"),
+        ("Photography", "Photography"),
+        ("Security", "Security"),
+        ("Other", "Other"),
+    ]
+
+    STATUS_CHOICES = [
+        ("PENDING", "Pending"),
+        ("APPROVED", "Approved"),
+        ("PAID", "Paid"),
+        ("REJECTED", "Rejected"),
+    ]
+
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name="expenses"
+    )
+
+    category = models.CharField(
+        max_length=50,
+        choices=CATEGORY_CHOICES
+    )
+
+    description = models.CharField(max_length=200)
+
+    amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="PENDING"
+    )
+
+    payment_method = models.CharField(
+        max_length=50,
+        blank=True
+    )
+
+    invoice_number = models.CharField(
+        max_length=100,
+        blank=True
+    )
+
+    expense_date = models.DateField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return f"{self.category} - ₹{self.amount}"
+
+
+class Revenue(models.Model):
+
+    SOURCE_CHOICES = [
+        ("Registration", "Registration"),
+        ("Sponsorship", "Sponsorship"),
+        ("Vendor Fee", "Vendor Fee"),
+        ("Donation", "Donation"),
+        ("Other", "Other"),
+    ]
+
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name="revenues"
+    )
+
+    source = models.CharField(
+        max_length=50,
+        choices=SOURCE_CHOICES
+    )
+
+    description = models.CharField(
+        max_length=200,
+        blank=True
+    )
+
+    amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2
+    )
+
+    received_date = models.DateField(
+        auto_now_add=True
+    )
+
+    payment_method = models.CharField(
+        max_length=50,
+        blank=True
+    )
+
+    def __str__(self):
+        return f"{self.source} - ₹{self.amount}"

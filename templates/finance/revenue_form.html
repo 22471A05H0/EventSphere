@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card p-4">
+
+        <h2>Add Revenue</h2>
+
+        <h5>{{ event.name }}</h5>
+
+        <form method="post">
+
+            {% csrf_token %}
+
+            {{ form.as_p }}
+
+            <button class="btn btn-success">
+                Save Revenue
+            </button>
+
+            <a href="{% url 'finance_dashboard' event.id %}"
+               class="btn btn-secondary">
+
+                Cancel
+
+            </a>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
