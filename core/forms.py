@@ -1,5 +1,5 @@
 from django import forms
-from .models import Event,Venue,Resource,Attendee,Vendor,VendorAssignment,Notification,Budget, Expense, Revenue
+from .models import Event,Venue,Resource,Attendee,Vendor,VendorAssignment,Notification,Budget, Expense, Revenue,Sponsorship, Approval, Reminder
 
 class EventForm(forms.ModelForm):
     class Meta:
@@ -121,5 +121,169 @@ class RevenueForm(forms.ModelForm):
 
             "payment_method": forms.TextInput(
                 attrs={"class": "form-control"}
+            ),
+        }
+
+class SponsorshipForm(forms.ModelForm):
+
+    class Meta:
+
+        model = Sponsorship
+
+        fields = [
+            "sponsor_name",
+            "contact_person",
+            "email",
+            "phone",
+            "sponsorship_type",
+            "amount",
+            "status",
+            "benefits",
+        ]
+
+        widgets = {
+
+            "sponsor_name": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Sponsor company name"
+                }
+            ),
+
+            "contact_person": forms.TextInput(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "email": forms.EmailInput(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "phone": forms.TextInput(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "sponsorship_type": forms.Select(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "amount": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "min": "0"
+                }
+            ),
+
+            "status": forms.Select(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "benefits": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 4,
+                    "placeholder": "Sponsor benefits"
+                }
+            ),
+        }
+
+    def clean_phone(self):
+
+        phone = self.cleaned_data["phone"]
+
+        if not phone.isdigit() or len(phone) != 10:
+            raise forms.ValidationError(
+                "Phone must contain exactly 10 digits."
+            )
+
+        return phone
+
+
+class ApprovalForm(forms.ModelForm):
+
+    class Meta:
+
+        model = Approval
+
+        fields = [
+            "approval_type",
+            "comments",
+        ]
+
+        widgets = {
+
+            "approval_type": forms.Select(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "comments": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 4,
+                    "placeholder": "Approval comments"
+                }
+            ),
+        }
+
+
+class ReminderForm(forms.ModelForm):
+
+    class Meta:
+
+        model = Reminder
+
+        fields = [
+            "reminder_type",
+            "title",
+            "message",
+            "reminder_date",
+            "recipient",
+        ]
+
+        widgets = {
+
+            "reminder_type": forms.Select(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "title": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Reminder title"
+                }
+            ),
+
+            "message": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 4
+                }
+            ),
+
+            "reminder_date": forms.DateTimeInput(
+                attrs={
+                    "class": "form-control",
+                    "type": "datetime-local"
+                }
+            ),
+
+            "recipient": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Email or recipient"
+                }
             ),
         }

@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="row align-items-center py-5">
+
+    <div class="col-md-7">
+
+        <span class="badge bg-primary mb-3">
+            Event Planning & Resource Management
+        </span>
+
+        <h1 class="display-4 fw-bold">
+            Plan Events Smarter with EventSphere
+        </h1>
+
+        <p class="lead text-muted mt-3">
+            EventSphere helps organizers manage events, venues,
+            resources, attendees, vendors, finances and event
+            operations from one centralized platform.
+        </p>
+
+        <div class="mt-4">
+
+            {% if user.is_authenticated %}
+
+                <a
+                    href="{% url 'accounts:dashboard' %}"
+                    class="btn btn-primary btn-lg me-2"
+                >
+                    Go to Dashboard
+                </a>
+
+            {% else %}
+
+                <a
+                    href="{% url 'accounts:login' %}"
+                    class="btn btn-primary btn-lg me-2"
+                >
+                    Login
+                </a>
+
+                <a
+                    href="{% url 'accounts:register' %}"
+                    class="btn btn-outline-primary btn-lg"
+                >
+                    Register
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-5">
+
+        <div class="card shadow-sm border-0 p-4">
+
+            <h4 class="fw-bold">
+                EventSphere
+            </h4>
+
+            <p class="text-muted">
+                A centralized platform for complete event
+                lifecycle management.
+            </p>
+
+            <hr>
+
+            <div class="mb-3">
+                <strong>✓ Event Management</strong>
+            </div>
+
+            <div class="mb-3">
+                <strong>✓ Venue Management</strong>
+            </div>
+
+            <div class="mb-3">
+                <strong>✓ Resource Allocation</strong>
+            </div>
+
+            <div class="mb-3">
+                <strong>✓ Vendor Management</strong>
+            </div>
+
+            <div class="mb-3">
+                <strong>✓ Finance Management</strong>
+            </div>
+
+            <div>
+                <strong>✓ Notifications & Approvals</strong>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

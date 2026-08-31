@@ -207,3 +207,216 @@ class Revenue(models.Model):
 
     def __str__(self):
         return f"{self.source} - ₹{self.amount}"
+
+class Sponsorship(models.Model):
+
+    STATUS_CHOICES = [
+        ("PROPOSED", "Proposed"),
+        ("APPROVED", "Approved"),
+        ("REJECTED", "Rejected"),
+        ("RECEIVED", "Payment Received"),
+    ]
+
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name="sponsorships"
+    )
+
+    sponsor_name = models.CharField(
+        max_length=150
+    )
+
+    contact_person = models.CharField(
+        max_length=120
+    )
+
+    email = models.EmailField()
+
+    phone = models.CharField(
+        max_length=10
+    )
+
+    sponsorship_type = models.CharField(
+        max_length=100,
+        choices=[
+            ("Title Sponsor", "Title Sponsor"),
+            ("Gold Sponsor", "Gold Sponsor"),
+            ("Silver Sponsor", "Silver Sponsor"),
+            ("Bronze Sponsor", "Bronze Sponsor"),
+            ("Food Sponsor", "Food Sponsor"),
+            ("Technology Sponsor", "Technology Sponsor"),
+            ("Media Sponsor", "Media Sponsor"),
+            ("Other", "Other"),
+        ]
+    )
+
+    amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2
+    )
+
+    status = models.CharField(
+        max_length=30,
+        choices=STATUS_CHOICES,
+        default="PROPOSED"
+    )
+
+    benefits = models.TextField(
+        blank=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return f"{self.sponsor_name} - {self.event.name}"
+
+
+class Approval(models.Model):
+
+    APPROVAL_TYPES = [
+        ("EVENT", "Event"),
+        ("EXPENSE", "Expense"),
+        ("SPONSORSHIP", "Sponsorship"),
+        ("VENUE", "Venue"),
+        ("RESOURCE", "Resource"),
+        ("VENDOR", "Vendor"),
+    ]
+
+    STATUS_CHOICES = [
+        ("PENDING", "Pending"),
+        ("APPROVED", "Approved"),
+        ("REJECTED", "Rejected"),
+    ]
+
+    approval_type = models.CharField(
+        max_length=30,
+        choices=APPROVAL_TYPES
+    )
+
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name="approvals",
+        null=True,
+        blank=True
+    )
+
+    expense = models.ForeignKey(
+        Expense,
+        on_delete=models.CASCADE,
+        related_name="approvals",
+        null=True,
+        blank=True
+    )
+
+    sponsorship = models.ForeignKey(
+        Sponsorship,
+        on_delete=models.CASCADE,
+        related_name="approvals",
+        null=True,
+        blank=True
+    )
+
+    requested_by = models.CharField(
+        max_length=150
+    )
+
+    approved_by = models.CharField(
+        max_length=150,
+        blank=True
+    )
+
+    comments = models.TextField(
+        blank=True
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="PENDING"
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    def __str__(self):
+        return f"{self.approval_type} - {self.status}"
+
+
+class Reminder(models.Model):
+
+    REMINDER_TYPES = [
+        ("EVENT", "Event"),
+        ("PAYMENT", "Payment"),
+        ("EXPENSE", "Expense"),
+        ("SPONSORSHIP", "Sponsorship"),
+        ("VENDOR", "Vendor"),
+        ("RESOURCE", "Resource"),
+        ("CUSTOM", "Custom"),
+    ]
+
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name="reminders",
+        null=True,
+        blank=True
+    )
+
+    reminder_type = models.CharField(
+        max_length=30,
+        choices=REMINDER_TYPES
+    )
+
+    title = models.CharField(
+        max_length=200
+    )
+
+    message = models.TextField()
+
+    reminder_date = models.DateTimeField()
+
+    recipient = models.CharField(
+        max_length=150
+    )
+
+    is_sent = models.BooleanField(
+        default=False
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return self.title
+
+
+class APIActivityLog(models.Model):
+
+    endpoint = models.CharField(
+        max_length=200
+    )
+
+    method = models.CharField(
+        max_length=10
+    )
+
+    description = models.CharField(
+        max_length=250
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return f"{self.method} - {self.endpoint}"

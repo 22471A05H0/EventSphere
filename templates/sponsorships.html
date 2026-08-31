@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+        <h2>{{ event.name }} - Sponsorships</h2>
+        <p class="text-muted">
+            Manage sponsors and sponsorship revenue
+        </p>
+    </div>
+
+    <a
+        href="{% url 'event_detail' event.id %}"
+        class="btn btn-secondary"
+    >
+        Back to Event
+    </a>
+
+</div>
+
+
+<div class="row g-3 mb-4">
+
+    <div class="col-md-4">
+
+        <div class="card shadow-sm border-0 p-3">
+
+            <small class="text-muted">
+                Total Sponsorship
+            </small>
+
+            <h3 class="text-primary">
+                ₹{{ total_sponsorship }}
+            </h3>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-4">
+
+        <div class="card shadow-sm border-0 p-3">
+
+            <small class="text-muted">
+                Sponsors
+            </small>
+
+            <h3>
+                {{ sponsors.count }}
+            </h3>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="row g-4">
+
+    <div class="col-md-5">
+
+        <div class="card shadow-sm border-0">
+
+            <div class="card-body">
+
+                <h5>Add Sponsor</h5>
+
+                <form method="post">
+
+                    {% csrf_token %}
+
+                    {{ form.as_p }}
+
+                    <button
+                        class="btn btn-primary w-100"
+                    >
+                        Add Sponsorship
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-7">
+
+        <div class="card shadow-sm border-0">
+
+            <div class="card-body">
+
+                <h5>Sponsors</h5>
+
+                <div class="table-responsive">
+
+                    <table class="table">
+
+                        <thead>
+
+                            <tr>
+                                <th>Sponsor</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                        {% for sponsor in sponsors %}
+
+                            <tr>
+
+                                <td>
+                                    {{ sponsor.sponsor_name }}
+                                </td>
+
+                                <td>
+                                    {{ sponsor.sponsorship_type }}
+                                </td>
+
+                                <td>
+                                    ₹{{ sponsor.amount }}
+                                </td>
+
+                                <td>
+
+                                    {% if sponsor.status == "APPROVED" %}
+
+                                        <span class="badge bg-success">
+                                            Approved
+                                        </span>
+
+                                    {% elif sponsor.status == "REJECTED" %}
+
+                                        <span class="badge bg-danger">
+                                            Rejected
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="badge bg-warning text-dark">
+                                            {{ sponsor.status }}
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                                <td>
+
+                                    {% if sponsor.status == "PROPOSED" %}
+
+                                    <a
+                                        href="{% url 'approve_sponsorship' sponsor.id %}"
+                                        class="btn btn-sm btn-primary"
+                                    >
+                                        Review
+                                    </a>
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+
+                                <td
+                                    colspan="5"
+                                    class="text-center text-muted"
+                                >
+                                    No sponsorships yet.
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

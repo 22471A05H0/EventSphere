@@ -4,8 +4,43 @@ from django.contrib import messages
 from django.core.files.base import ContentFile
 from django.db.models import Count,Sum
 from django.shortcuts import get_object_or_404,redirect,render
-from .models import Event,Venue,Resource,ResourceAllocation,Attendee,Ticket,Vendor,VendorAssignment,Notification,Budget, Expense, Revenue
-from .forms import EventForm,VenueForm,ResourceForm,AttendeeForm,VendorForm,AllocationForm,AssignmentForm,RatingForm,NotificationForm,BudgetForm, ExpenseForm, RevenueForm
+from .models import (
+    Event,
+    Venue,
+    Resource,
+    ResourceAllocation,
+    Attendee,
+    Ticket,
+    Vendor,
+    VendorAssignment,
+    Notification,
+    Budget,
+    Expense,
+    Revenue,
+    Sponsorship,
+    Approval,
+    Reminder,
+    APIActivityLog
+)
+from .forms import (
+    EventForm,
+    VenueForm,
+    ResourceForm,
+    AttendeeForm,
+    VendorForm,
+    AllocationForm,
+    AssignmentForm,
+    RatingForm,
+    NotificationForm,
+    BudgetForm,
+    ExpenseForm,
+    RevenueForm,
+    SponsorshipForm,
+    ApprovalForm,
+    ReminderForm
+)
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
 
 
 def dashboard(request):
@@ -261,3 +296,705 @@ def add_revenue(request, event_id):
             "form": form,
         }
     )
+
+def sponsorships(request, event_id):
+
+    event = get_object_or_404(
+        Event,
+        id=event_id
+    )
+
+    form = SponsorshipForm(
+        request.POST or None
+    )
+
+    if request.method == "POST" and form.is_valid():
+
+        sponsorship = form.save(
+            commit=False
+        )
+
+        sponsorship.event = event
+        sponsorship.save()
+
+        messages.success(
+            request,
+            "Sponsorship added successfully."
+        )
+
+        return redirect(
+            "sponsorships",
+            event_id=event.id
+        )
+
+    sponsors = Sponsorship.objects.filter(
+        event=event
+    ).order_by("-created_at")
+
+    total_sponsorship = sum(
+        sponsor.amount
+        for sponsor in sponsors
+        if sponsor.status in ["APPROVED", "RECEIVED"]
+    )
+
+    return render(
+        request,
+        "sponsorships.html",
+        {
+            "event": event,
+            "form": form,
+            "sponsors": sponsors,
+            "total_sponsorship": total_sponsorship,
+        }
+    )
+
+def approve_sponsorship(request, sponsorship_id):
+
+    sponsorship = get_object_or_404(
+        Sponsorship,
+        id=sponsorship_id
+    )
+
+    if request.method == "POST":
+
+        action = request.POST.get("action")
+
+        if action == "approve":
+
+            sponsorship.status = "APPROVED"
+            sponsorship.save()
+
+            Revenue.objects.create(
+                event=sponsorship.event,
+                source="Sponsorship",
+                description=(
+                    f"Sponsorship from "
+                    f"{sponsorship.sponsor_name}"
+                ),
+                amount=sponsorship.amount,
+                payment_method="Sponsorship"
+            )
+
+            messages.success(
+                request,
+                "Sponsorship approved."
+            )
+
+        elif action == "reject":
+
+            sponsorship.status = "REJECTED"
+            sponsorship.save()
+
+            messages.warning(
+                request,
+                "Sponsorship rejected."
+            )
+
+        return redirect(
+            "sponsorships",
+            event_id=sponsorship.event.id
+        )
+
+    return render(
+        request,
+        "approve_sponsorship.html",
+        {
+            "sponsorship": sponsorship
+        }
+    )
+
+def request_expense_approval(request, expense_id):
+
+    expense = get_object_or_404(
+        Expense,
+        id=expense_id
+    )
+
+    if expense.status != "PENDING":
+
+        messages.warning(
+            request,
+            "Only pending expenses can be submitted for approval."
+        )
+
+        return redirect(
+            "finance_dashboard",
+            event_id=expense.event.id
+        )
+
+    if request.method == "POST":
+
+        approval = Approval.objects.create(
+            approval_type="EXPENSE",
+            event=expense.event,
+            expense=expense,
+            requested_by=(
+                request.user.username
+                if request.user.is_authenticated
+                else "System"
+            ),
+            comments=request.POST.get(
+                "comments",
+                ""
+            )
+        )
+
+        Notification.objects.create(
+            recipient_type="Participant",
+            recipient="Finance Manager",
+            message=(
+                f"Expense approval requested for "
+                f"{expense.event.name}: "
+                f"₹{expense.amount}"
+            ),
+            sent=True
+        )
+
+        messages.success(
+            request,
+            "Expense approval request submitted."
+        )
+
+        return redirect(
+            "finance_dashboard",
+            event_id=expense.event.id
+        )
+
+    return render(
+        request,
+        "finance/request_approval.html",
+        {
+            "expense": expense
+        }
+    )
+
+def approve_sponsorship(request, sponsorship_id):
+
+    sponsorship = get_object_or_404(
+        Sponsorship,
+        id=sponsorship_id
+    )
+
+    if request.method == "POST":
+
+        action = request.POST.get("action")
+
+        if action == "approve":
+
+            sponsorship.status = "APPROVED"
+            sponsorship.save()
+
+            Revenue.objects.create(
+                event=sponsorship.event,
+                source="Sponsorship",
+                description=(
+                    f"Sponsorship from "
+                    f"{sponsorship.sponsor_name}"
+                ),
+                amount=sponsorship.amount,
+                payment_method="Sponsorship"
+            )
+
+            messages.success(
+                request,
+                "Sponsorship approved."
+            )
+
+        elif action == "reject":
+
+            sponsorship.status = "REJECTED"
+            sponsorship.save()
+
+            messages.warning(
+                request,
+                "Sponsorship rejected."
+            )
+
+        return redirect(
+            "sponsorships",
+            event_id=sponsorship.event.id
+        )
+
+    return render(
+        request,
+        "approve_sponsorship.html",
+        {
+            "sponsorship": sponsorship
+        }
+    )
+
+def request_expense_approval(request, expense_id):
+
+    expense = get_object_or_404(
+        Expense,
+        id=expense_id
+    )
+
+    if expense.status != "PENDING":
+
+        messages.warning(
+            request,
+            "Only pending expenses can be submitted for approval."
+        )
+
+        return redirect(
+            "finance_dashboard",
+            event_id=expense.event.id
+        )
+
+    if request.method == "POST":
+
+        approval = Approval.objects.create(
+            approval_type="EXPENSE",
+            event=expense.event,
+            expense=expense,
+            requested_by=(
+                request.user.username
+                if request.user.is_authenticated
+                else "System"
+            ),
+            comments=request.POST.get(
+                "comments",
+                ""
+            )
+        )
+
+        Notification.objects.create(
+            recipient_type="Participant",
+            recipient="Finance Manager",
+            message=(
+                f"Expense approval requested for "
+                f"{expense.event.name}: "
+                f"₹{expense.amount}"
+            ),
+            sent=True
+        )
+
+        messages.success(
+            request,
+            "Expense approval request submitted."
+        )
+
+        return redirect(
+            "finance_dashboard",
+            event_id=expense.event.id
+        )
+
+    return render(
+        request,
+        "finance/request_approval.html",
+        {
+            "expense": expense
+        }
+    )
+
+def approval_dashboard(request):
+
+    approvals = Approval.objects.select_related(
+        "event",
+        "expense",
+        "sponsorship"
+    ).order_by("-created_at")
+
+    return render(
+        request,
+        "approvals.html",
+        {
+            "approvals": approvals
+        }
+    )
+
+def process_approval(request, approval_id):
+
+    approval = get_object_or_404(
+        Approval,
+        id=approval_id
+    )
+
+    if request.method == "POST":
+
+        action = request.POST.get(
+            "action"
+        )
+
+        if action == "approve":
+
+            approval.status = "APPROVED"
+
+            approval.approved_by = (
+                request.user.username
+                if request.user.is_authenticated
+                else "Admin"
+            )
+
+            approval.comments = request.POST.get(
+                "comments",
+                approval.comments
+            )
+
+            approval.save()
+
+            if approval.expense:
+
+                approval.expense.status = "APPROVED"
+                approval.expense.save()
+
+            if approval.sponsorship:
+
+                approval.sponsorship.status = "APPROVED"
+                approval.sponsorship.save()
+
+            messages.success(
+                request,
+                "Approval completed successfully."
+            )
+
+        elif action == "reject":
+
+            approval.status = "REJECTED"
+
+            approval.approved_by = (
+                request.user.username
+                if request.user.is_authenticated
+                else "Admin"
+            )
+
+            approval.comments = request.POST.get(
+                "comments",
+                approval.comments
+            )
+
+            approval.save()
+
+            if approval.expense:
+
+                approval.expense.status = "REJECTED"
+                approval.expense.save()
+
+            if approval.sponsorship:
+
+                approval.sponsorship.status = "REJECTED"
+                approval.sponsorship.save()
+
+            messages.warning(
+                request,
+                "Request rejected."
+            )
+
+        return redirect(
+            "approval_dashboard"
+        )
+
+    return render(
+        request,
+        "process_approval.html",
+        {
+            "approval": approval
+        }
+    )
+
+def reminders(request):
+
+    form = ReminderForm(
+        request.POST or None
+    )
+
+    if request.method == "POST" and form.is_valid():
+
+        reminder = form.save()
+
+        messages.success(
+            request,
+            "Reminder created successfully."
+        )
+
+        return redirect(
+            "reminders"
+        )
+
+    reminder_list = Reminder.objects.order_by(
+        "reminder_date"
+    )
+
+    return render(
+        request,
+        "reminders.html",
+        {
+            "form": form,
+            "reminders": reminder_list
+        }
+    )
+
+def mark_reminder_sent(request, reminder_id):
+
+    reminder = get_object_or_404(
+        Reminder,
+        id=reminder_id
+    )
+
+    reminder.is_sent = True
+    reminder.save()
+
+    Notification.objects.create(
+        recipient_type="Participant",
+        recipient=reminder.recipient,
+        message=reminder.message,
+        sent=True
+    )
+
+    messages.success(
+        request,
+        "Reminder marked as sent."
+    )
+
+    return redirect(
+        "reminders"
+    )
+
+
+def api_events(request):
+
+    events = Event.objects.select_related(
+        "venue"
+    ).all()
+
+    data = []
+
+    for event in events:
+
+        data.append({
+            "id": event.id,
+            "name": event.name,
+            "event_type": event.event_type,
+            "date": str(event.date),
+            "budget": str(event.budget),
+            "expected_participants": event.expected_participants,
+            "status": event.status,
+            "venue": (
+                event.venue.name
+                if event.venue
+                else None
+            ),
+        })
+
+    APIActivityLog.objects.create(
+        endpoint="/api/events/",
+        method=request.method,
+        description="Event list API accessed"
+    )
+
+    return JsonResponse(
+        {
+            "success": True,
+            "count": len(data),
+            "events": data
+        }
+    )
+
+def api_event_detail(request, event_id):
+
+    event = get_object_or_404(
+        Event.objects.select_related("venue"),
+        id=event_id
+    )
+
+    data = {
+
+        "id": event.id,
+
+        "name": event.name,
+
+        "event_type": event.event_type,
+
+        "date": str(event.date),
+
+        "budget": str(event.budget),
+
+        "expected_participants":
+            event.expected_participants,
+
+        "status":
+            event.status,
+
+        "venue":
+            event.venue.name
+            if event.venue
+            else None,
+
+        "attendees":
+            event.attendees.count(),
+
+        "resources":
+            event.resource_allocations.count(),
+
+        "vendors":
+            event.vendor_assignments.count(),
+
+        "sponsorships":
+            event.sponsorships.count(),
+    }
+
+    APIActivityLog.objects.create(
+        endpoint=f"/api/events/{event_id}/",
+        method=request.method,
+        description="Event detail API accessed"
+    )
+
+    return JsonResponse({
+        "success": True,
+        "event": data
+    })
+
+def api_finance(request, event_id):
+
+    event = get_object_or_404(
+        Event,
+        id=event_id
+    )
+
+    budget, created = Budget.objects.get_or_create(
+        event=event,
+        defaults={
+            "amount": 0
+        }
+    )
+
+    paid_expenses = Expense.objects.filter(
+        event=event,
+        status="PAID"
+    )
+
+    approved_expenses = Expense.objects.filter(
+        event=event,
+        status="APPROVED"
+    )
+
+    revenues = Revenue.objects.filter(
+        event=event
+    )
+
+    total_paid = sum(
+        expense.amount
+        for expense in paid_expenses
+    )
+
+    total_approved = sum(
+        expense.amount
+        for expense in approved_expenses
+    )
+
+    total_revenue = sum(
+        revenue.amount
+        for revenue in revenues
+    )
+
+    return JsonResponse({
+
+        "success": True,
+
+        "event": event.name,
+
+        "budget": str(
+            budget.amount
+        ),
+
+        "paid_expenses": str(
+            total_paid
+        ),
+
+        "approved_expenses": str(
+            total_approved
+        ),
+
+        "revenue": str(
+            total_revenue
+        ),
+
+        "remaining_budget": str(
+            budget.amount - total_paid
+        ),
+
+        "profit": str(
+            total_revenue - total_paid
+        ),
+    })
+
+def api_sponsorships(request, event_id):
+
+    event = get_object_or_404(
+        Event,
+        id=event_id
+    )
+
+    sponsors = Sponsorship.objects.filter(
+        event=event
+    )
+
+    data = []
+
+    for sponsor in sponsors:
+
+        data.append({
+
+            "id": sponsor.id,
+
+            "sponsor":
+                sponsor.sponsor_name,
+
+            "type":
+                sponsor.sponsorship_type,
+
+            "amount":
+                str(sponsor.amount),
+
+            "status":
+                sponsor.status,
+
+            "contact":
+                sponsor.contact_person,
+
+            "email":
+                sponsor.email,
+        })
+
+    return JsonResponse({
+
+        "success": True,
+
+        "event":
+            event.name,
+
+        "count":
+            len(data),
+
+        "sponsorships":
+            data
+    })
+
+def home(request):
+    """
+    Public landing page.
+    This page is accessible before login.
+    """
+    return render(request, "home.html")
+
+
+def about(request):
+    """
+    About EventSphere page.
+    """
+    return render(request, "about.html")
+
+
+def how_it_works(request):
+    """
+    Explains the EventSphere workflow.
+    """
+    return render(request, "how_it_works.html")
+
+
+def features(request):
+    """
+    Displays the major EventSphere features.
+    """
+    return render(request, "features.html")

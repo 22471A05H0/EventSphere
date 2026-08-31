@@ -1,11 +1,15 @@
 <!doctype html>
+
 <html lang="en">
 
 <head>
 
     <meta charset="utf-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
 
     <title>EventSphere</title>
 
@@ -20,97 +24,157 @@
 <body class="bg-light">
 
 
-<!-- ================= NAVBAR ================= -->
+<!-- =====================================================
+     NAVBAR
+===================================================== -->
 
 <nav class="navbar navbar-dark bg-primary">
 
     <div class="container">
 
-        <!-- Brand -->
+        <!-- BRAND -->
 
         <a
             class="navbar-brand fw-bold"
-            href="/"
+            href="{% url 'home' %}"
         >
             EventSphere
         </a>
 
 
-        <!-- Navigation -->
-
         <div class="d-flex flex-wrap gap-1 align-items-center">
 
 
-            <!-- ================= EXISTING MILESTONE 1 + 2 ================= -->
+            <!-- =================================================
+                 PUBLIC NAVIGATION
+            ================================================== -->
+
+            {% if not user.is_authenticated %}
+
+                <a
+                    class="btn btn-sm btn-light"
+                    href="{% url 'home' %}"
+                >
+                    Home
+                </a>
 
 
-            <a
-                class="btn btn-sm btn-light"
-                href="/events/create/"
-            >
-                Create Event
-            </a>
+                <a
+                    class="btn btn-sm btn-light"
+                    href="{% url 'about' %}"
+                >
+                    About
+                </a>
 
 
-            <a
-                class="btn btn-sm btn-light"
-                href="/venues/"
-            >
-                Venues
-            </a>
+                <a
+                    class="btn btn-sm btn-light"
+                    href="{% url 'how_it_works' %}"
+                >
+                    How It Works
+                </a>
 
 
-            <a
-                class="btn btn-sm btn-light"
-                href="/resources/"
-            >
-                Resources
-            </a>
+                <a
+                    class="btn btn-sm btn-light"
+                    href="{% url 'features' %}"
+                >
+                    Features
+                </a>
 
 
-            <a
-                class="btn btn-sm btn-light"
-                href="/vendors/"
-            >
-                Vendors
-            </a>
+                <a
+                    class="btn btn-sm btn-warning"
+                    href="{% url 'accounts:login' %}"
+                >
+                    Login
+                </a>
 
 
-            <a
-                class="btn btn-sm btn-light"
-                href="/checkin/"
-            >
-                Check-in
-            </a>
+                <a
+                    class="btn btn-sm btn-outline-light"
+                    href="{% url 'accounts:register' %}"
+                >
+                    Register
+                </a>
 
 
-            <a
-                class="btn btn-sm btn-light"
-                href="/notifications/"
-            >
-                Notifications
-            </a>
+            <!-- =================================================
+                 LOGGED-IN NAVIGATION
+            ================================================== -->
 
-
-            <a
-                class="btn btn-sm btn-light"
-                href="/reports/"
-            >
-                Reports
-            </a>
-
-
-            <!-- ================= MILESTONE 3 ================= -->
-
-
-            {% if user.is_authenticated %}
+            {% else %}
 
 
                 <a
                     class="btn btn-sm btn-warning"
                     href="{% url 'accounts:dashboard' %}"
                 >
-                    My Dashboard
+                    Dashboard
+                </a>
+
+
+                <a
+                    class="btn btn-sm btn-light"
+                    href="{% url 'create_event' %}"
+                >
+                    Create Event
+                </a>
+
+
+                <a
+                    class="btn btn-sm btn-light"
+                    href="{% url 'venues' %}"
+                >
+                    Venues
+                </a>
+
+
+                <a
+                    class="btn btn-sm btn-light"
+                    href="{% url 'resources' %}"
+                >
+                    Resources
+                </a>
+
+
+                <a
+                    class="btn btn-sm btn-light"
+                    href="{% url 'vendors' %}"
+                >
+                    Vendors
+                </a>
+
+
+                <a
+                    class="btn btn-sm btn-light"
+                    href="{% url 'notifications' %}"
+                >
+                    Notifications
+                </a>
+
+
+                <a
+                    class="btn btn-sm btn-light"
+                    href="{% url 'reports' %}"
+                >
+                    Reports
+                </a>
+
+
+                <a
+                    class="btn btn-sm btn-light"
+                    href="{% url 'approval_dashboard' %}"
+                >
+                    Approvals
+                </a>
+
+
+                <a
+                    class="btn btn-sm btn-light"
+                    href="{% url 'reminders' %}"
+                >
+                    Reminders
                 </a>
 
 
@@ -130,19 +194,7 @@
                 </a>
 
 
-            {% else %}
-
-
-                <a
-                    class="btn btn-sm btn-warning"
-                    href="{% url 'accounts:login' %}"
-                >
-                    Login
-                </a>
-
-
             {% endif %}
-
 
         </div>
 
@@ -151,25 +203,27 @@
 </nav>
 
 
-<!-- ================= MAIN CONTENT ================= -->
+<!-- =====================================================
+     MAIN CONTENT
+===================================================== -->
 
 <main class="container py-4">
 
 
-    <!-- Django Messages -->
+    <!-- DJANGO MESSAGES -->
 
     {% for message in messages %}
 
-        <div class="alert alert-{{ message.tags|default:'info' }}">
-
+        <div
+            class="alert alert-{{ message.tags|default:'info' }}"
+        >
             {{ message }}
-
         </div>
 
     {% endfor %}
 
 
-    <!-- Page Content -->
+    <!-- PAGE CONTENT -->
 
     {% block content %}
 
